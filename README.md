@@ -14,7 +14,7 @@ bax@MacBook-Pro-de-Lucas-3 Figures % scp -r  lbackes@master.alan.priv:/home/lbac
 
 ```
 scp -r main.py lbackes@master.alan.priv:/home/lbackes/mri_data/
-
+```
 
 ![training](https://user-images.githubusercontent.com/38333245/163365187-6a7847e8-683d-4e48-bff5-136348eb6d2c.png)
 
