@@ -8,8 +8,9 @@ main.py : contains the functions able to load the data, the setting of hyperpara
 
 Last time I ran this code (so with the ViT model) I got those plots
 
+'''
 bax@MacBook-Pro-de-Lucas-3 Figures % scp -r  lbackes@master.alan.priv:/home/lbackes/mri_data/Figures ./
-
+'''
 
 ![training](https://user-images.githubusercontent.com/38333245/163365187-6a7847e8-683d-4e48-bff5-136348eb6d2c.png)
 
