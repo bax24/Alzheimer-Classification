@@ -22,3 +22,5 @@ bax@MacBook-Pro-de-Lucas-3 Thesis % scp -r main.py lbackes@master.alan.priv:/hom
 ```
 
 
+
+![E_CNN200-25-A](https://user-images.githubusercontent.com/38333245/169572281-15217f52-7cb7-4c05-85d5-7012e7358794.png)
