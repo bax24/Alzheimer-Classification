@@ -155,7 +155,7 @@ if __name__ == '__main__':
         optimizer = optim.RMSprop(model.parameters(), lr=args.lr)
 
     # Define my Loss
-    loss = nn.BCELoss()  # Not used for ViT
+    loss = nn.BCELoss()  # Not used for ViT or CNN for now
 
     # Downloading datasets
 
@@ -164,8 +164,6 @@ if __name__ == '__main__':
     train_size = int(0.7 * len(dataset))
     test_size = len(dataset) - train_size
     train_set, test_set = torch.utils.data.random_split(dataset, [train_size, test_size])
-
-    #train_set, test_set = get_data(train_size=0.7, disp=True)
 
     train_loader = DataLoader(train_set, batch_size=args.batches, shuffle=True)
     test_loader = DataLoader(test_set, batch_size=args.batches, shuffle=True)
