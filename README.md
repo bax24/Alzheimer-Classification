@@ -10,7 +10,7 @@ Last time I ran this code (so with the ViT model) I got those plots
 
 ```
 ssh lbackes@master.alan.priv
-
+```
 
 ```
 bax@MacBook-Pro-de-Lucas-3 Figures % scp -r  lbackes@master.alan.priv:/home/lbackes/mri_data/Figures ./
