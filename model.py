@@ -15,10 +15,18 @@ def conv_block_3d(in_dim, out_dim, stride=1, padding=1, batch_norm=True):
     :param batch_norm: whether use bn
     :return: model itself
     '''
-    conv_block = nn.Sequential(
-        nn.Conv3d(in_dim, out_dim, kernel_size=3, stride=stride, padding=padding),
-        nn.ReLU()
-    )
+    if batch_norm:
+        conv_block = nn.Sequential(
+            nn.Conv3d(in_dim, out_dim, kernel_size=3, stride=stride, padding=padding),
+            # nn.ReLU(),
+            nn.BatchNorm3d(out_dim),
+            nn.ReLU()
+        )
+    else:
+        conv_block = nn.Sequential(
+            nn.Conv3d(in_dim, out_dim, kernel_size=3, stride=stride, padding=padding),
+            nn.ReLU()
+        )
     return conv_block
 
 
@@ -67,19 +75,22 @@ def baseline_conv_layers_A(init_kernel=16):
 
 
 class NetworkA(nn.Module):
-    def __init__(self, init_kernel, n_output=2):
+    def __init__(self, init_kernel, device, n_output=2):
         super(NetworkA, self).__init__()
         self.init_kernel = init_kernel
-        #self.device = device
+        self.device = device
         self.n_output = n_output
 
         # share conv kernels
         self.conv = baseline_conv_layers_A(init_kernel)
 
         # fc layers
+        # 3 * 3 * 1 * 8 * kernel = 2304  --> 512
+        # kernel * 384 = 12288
         self.fc = nn.Sequential(
-            nn.Linear(3 * 3 * 1 * 8 * init_kernel, 512),
+            nn.Linear(384 * init_kernel, 2304),
             nn.Dropout(),
+            nn.Linear(2304, 512),
             nn.Linear(512, 10),
             nn.Dropout(),
             nn.Linear(10, n_output),
@@ -89,7 +100,7 @@ class NetworkA(nn.Module):
         mri, label = inputs
 
         # [B, 48, 96, 96] -> [B, 1, 48, 96, 96]
-        #mri = mri.unsqueeze(1)
+        mri = mri.unsqueeze(1)
         #pet = pet.unsqueeze(1)
 
         #img = torch.cat([mri, pet], 1)
