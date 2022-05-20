@@ -9,6 +9,10 @@ main.py : contains the functions able to load the data, the setting of hyperpara
 Last time I ran this code (so with the ViT model) I got those plots
 
 ```
+ssh lbackes@master.alan.priv
+
+
+```
 bax@MacBook-Pro-de-Lucas-3 Figures % scp -r  lbackes@master.alan.priv:/home/lbackes/mri_data/Figures ./
 ```
 
