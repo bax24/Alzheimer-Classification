@@ -1,5 +1,3 @@
-from abc import ABC
-
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
 import numpy as np
@@ -108,8 +106,6 @@ class MRIDataset(Dataset):
 
 if __name__ == '__main__':
 
-    start_time = time.time()
-
     parser = argparse.ArgumentParser(description='AD Classifier')
     parser.add_argument('--epochs', type=int, default=10, metavar='N',
                         help='number of epochs to train (default: 10)')
@@ -181,22 +177,12 @@ if __name__ == '__main__':
         print("--------------------")
         print("EPOCH " + str(epoch))
         print("--------------------")
-        total_loss = t.train(model, train_loader, optimizer, epoch, device)
+        total_loss = f.train(model, train_loader, optimizer, epoch, device)
         train_loss.append(total_loss)
         print("\nTraining ok ! With a loss of ", total_loss)
-        total_loss = t.test(model, test_loader, epoch, device)
+        total_loss = f.test(model, test_loader, epoch, device)
         test_loss.append(total_loss)
         print("Testing ok ! With a loss of \n", total_loss)
-
-    # Plotting Training loss
-    # name = str('T') + str('_') + id
-    # plt.Figure(figsize=(13, 5))
-    # plt.title('Training loss')
-    # ax = plt.gca()
-    # ax.set_ylim([0, 30])
-    # plt.plot(train_loss, label="Training")
-    # plt.xlabel('Epoch')
-    # plt.ylabel('Loss')
 
     # Plotting Testing loss
     name = str('E') + str('_') + id
