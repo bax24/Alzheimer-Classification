@@ -6,6 +6,8 @@ TrainModelCNN.py : contains the train and test functions
 
 main.py : contains the functions able to load the data, the setting of hyperparameters and the plot function for train and test loss
 
+Normalizing the data was done in the Skull_stripped notebook by using the method implemented by https://github.com/jcreinhold/intensity-normalization
+
 
 ```
 ssh lbackes@master.alan.priv
