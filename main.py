@@ -113,7 +113,7 @@ if __name__ == '__main__':
                         help='enables CUDA training')
     parser.add_argument('--batches', type=int, default=10, metavar='N',
                         help='input batch size for training (default: 10)')
-    parser.add_argument('--data', type=str, default='S_C/', metavar='str',
+    parser.add_argument('--data', type=str, default='Batch/', metavar='str',
                         help='folder that contains data (default: S_C)')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='the learning rate (default: 0.001')
@@ -121,11 +121,14 @@ if __name__ == '__main__':
                         help='the network name (default: CNN)')
     parser.add_argument('--optim', type=str, default='ADAM', metavar='str',
                         help='the optimizer')
+    parser.add_argument('--tag', type=str, default='', metavar='str',
+                        help='a tag')
 
     args = parser.parse_args()
     print("Args: ", args)
 
-    id = args.network + str(args.epochs) + str('-') + str(args.batches) + str('-') + args.optim[0]
+    id = args.network + str(args.epochs) + str('-') + str(args.batches) + str('-') + args.optim[0] + str('-') \
+         + args.data + args.tag
 
     # GPU and CUDA
     print("The number of GPUs:", torch.cuda.device_count())
@@ -140,7 +143,7 @@ if __name__ == '__main__':
     if args.network == 'CNN':
         model = NetworkA(init_kernel=32, device=device)
     else:
-        model = NetworkB(in_channel=1, out_channel=1, img_size=(128, 128, 96), pos_embed='conv')
+        model = NetworkB(in_channel=1, out_channel=1, img_size=(96, 96, 48), pos_embed='conv')
 
     model.to(device)
 
@@ -183,7 +186,7 @@ if __name__ == '__main__':
         print("Testing ok ! With a loss of \n", total_loss)
 
     # Plotting Testing loss
-    name = str('E') + str('_') + id
+    name = id
     plt.Figure(figsize=(13, 5))
     plt.title('Evolution of Loss curves')
     ax = plt.gca()

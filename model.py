@@ -88,9 +88,10 @@ class NetworkA(nn.Module):
         # 3 * 3 * 1 * 8 * kernel = 2304  --> 512
         # kernel * 384 = 12288
         self.fc = nn.Sequential(
-            nn.Linear(384 * init_kernel, 2304),
+            #nn.Linear(384 * init_kernel, 2304),
+            nn.Linear(3 * 3 * 1 * 8 * init_kernel, 512),
             nn.Dropout(),
-            nn.Linear(2304, 512),
+            #nn.Linear(2304, 512),
             nn.Linear(512, 10),
             nn.Dropout(),
             nn.Linear(10, n_output),
@@ -152,7 +153,9 @@ class NetworkB(nn.Module):
         self.layer_out = nn.Sigmoid()
 
     def forward(self, input):
-        x, hidden_states_out = self.vit(input)
+        mri, label = input
+        mri = mri.unsqueeze(1)
+        x, hidden_states_out = self.vit(mri)
         # output = F.log_softmax(x, dim=1)
         output = self.layer_out(x)
 
