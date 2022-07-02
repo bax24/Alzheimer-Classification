@@ -10,11 +10,11 @@ import torchvision.transforms as transforms
 from torch import optim
 import argparse
 import torch.nn as nn
-from model import NetworkA
+from model import NetworkRoi, NetworkFull
 import trainModelCNN as f
-import trainModel as t
 from collections import Counter
 import time
+import monai
 
 
 def get_data(train_size, disp=False):
@@ -76,15 +76,21 @@ class MRIDataset(Dataset):
         self.__MRI = []
         self.__label = []
 
-        self.neg = 'CN'
-        self.pos = 'AD'
+        if args.classification == 1:
+            diagnosis = ['AD', 'CN']
+            self.neg = 'CN'
+            self.pos = 'AD'
+        if args.classification == 2:
+            diagnosis = ['AD', 'MCI']
+            self.neg = 'MCI'
+            self.pos = 'AD'
 
         self.root_dir = root_dir
         self.transform = transform
 
         label_dict = {self.neg: 0, self.pos: 1}
 
-        for diag in ['AD', 'CN']:
+        for diag in diagnosis:
             path = os.path.join(root_dir, diag)
             for _, _, files in os.walk(path):
                 for filename in files:
@@ -107,7 +113,7 @@ class MRIDataset(Dataset):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='AD Classifier')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    parser.add_argument( '--epochs', type=int, default=10, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--no_cuda', action='store_true', default=False,
                         help='enables CUDA training')
@@ -117,10 +123,14 @@ if __name__ == '__main__':
                         help='folder that contains data (default: S_C)')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='the learning rate (default: 0.001')
-    parser.add_argument('--network', type=str, default='CNN', metavar='str',
+    parser.add_argument('--kernel', type=int, default=16, metavar='N',
+                        help='the kernel size (default: 16')
+    parser.add_argument('--network', type=str, default='V', metavar='str',
                         help='the network name (default: CNN)')
     parser.add_argument('--optim', type=str, default='ADAM', metavar='str',
-                        help='the optimizer')
+                        help='the optimizer (default: Adam)')
+    parser.add_argument('--classification', type=str, default=1, metavar='N',
+                        help='What would you like to classify ? (default: AD vs CN)')
     parser.add_argument('--tag', type=str, default='', metavar='str',
                         help='a tag')
 
@@ -128,7 +138,7 @@ if __name__ == '__main__':
     print("Args: ", args)
 
     id = args.network + str(args.epochs) + str('-') + str(args.batches) + str('-') + args.optim[0] + str('-') \
-         + args.data + args.tag
+         + args.data + str('-') + str(args.kernel) + str('-') + args.tag
 
     # GPU and CUDA
     print("The number of GPUs:", torch.cuda.device_count())
@@ -140,10 +150,20 @@ if __name__ == '__main__':
     # Define my model
     # ----------------
     # 3D CNN
-    if args.network == 'CNN':
-        model = NetworkA(init_kernel=32, device=device)
+    if args.network == 'CNN_Roi':
+        model = NetworkRoi(init_kernel=args.kernel, device=device)
+    elif args.network == 'CNN_Full':
+        model = NetworkFull(init_kernel=args.kernel, device=device)
+    elif args.network == 'ViT':
+        model = NetworkB(in_channel=1, out_channel=1, img_size=(128, 128, 96), pos_embed='conv')
+    elif args.network == 'Chris':
+        model = monai.networks.nets.ViT(in_channels=1, patch_size=(16, 16, 16), img_size=(96, 96, 48), pos_embed='conv',
+                                        num_classes=2, hidden_size=768, mlp_dim=3072, classification=True, num_heads=12,
+                                        dropout_rate=0.0)
+        model.classification_head = nn.Sequential(nn.Linear(768, 2))
     else:
-        model = NetworkB(in_channel=1, out_channel=1, img_size=(96, 96, 48), pos_embed='conv')
+        model = monai.networks.nets.ViT(in_channels=1, img_size=(128, 128, 96), pos_embed='conv', classification=True,
+                                        patch_size = (16, 16, 16))
 
     model.to(device)
 
@@ -168,6 +188,10 @@ if __name__ == '__main__':
     test_size = len(dataset) - train_size
     train_set, test_set = torch.utils.data.random_split(dataset, [train_size, test_size])
 
+    # means = train_set.mean(dim=1, keepdim=True)
+    # stds = train_set.std(dim=1, keepdim=True)
+    # normalized_data = (train_set - means) / stds
+
     train_loader = DataLoader(train_set, batch_size=args.batches, shuffle=True)
     test_loader = DataLoader(test_set, batch_size=args.batches, shuffle=True)
 
@@ -178,10 +202,10 @@ if __name__ == '__main__':
         print("--------------------")
         print("EPOCH " + str(epoch))
         print("--------------------")
-        total_loss = f.train(model, train_loader, optimizer, epoch, device)
+        total_loss = f.train(model, train_loader, optimizer, epoch, loss, device)
         train_loss.append(total_loss)
         print("\nTraining ok ! With a loss of ", total_loss)
-        total_loss = f.test(model, test_loader, epoch, device)
+        total_loss = f.test(model, test_loader, epoch, loss, device)
         test_loss.append(total_loss)
         print("Testing ok ! With a loss of \n", total_loss)
 
@@ -190,10 +214,10 @@ if __name__ == '__main__':
     plt.Figure(figsize=(13, 5))
     plt.title('Evolution of Loss curves')
     ax = plt.gca()
-    ax.set_ylim([0, 30])
+    # ax.set_ylim([-30, 30])
     plt.plot(train_loss, label='Training')
     plt.plot(test_loss, label='Testing')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend(loc="upper right")
-    plt.savefig('Figures/' + name)
+    plt.savefig(name)
