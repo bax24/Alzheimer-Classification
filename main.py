@@ -138,7 +138,7 @@ class MRIDataset(Dataset):
         normalized_mri = (mri_image - means) / stds
         label = self.__label[index]
 
-        return mri_image, label
+        return normalized_mri, label
 
     def __len__(self):
         return len(self.__MRI)
