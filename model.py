@@ -16,7 +16,7 @@ from monai.networks.blocks.dynunet_block import UnetOutBlock
 # from monai.networks.nets import ViT
 
 
-def conv_block_3d(in_dim, out_dim, stride=1, padding=1, batch_norm=True):
+def conv_block_3d(in_dim, out_dim, stride=1, padding=1, batch_norm=False):
     '''
     A standard 3d Conv block
     :param in_dim: in_channels
